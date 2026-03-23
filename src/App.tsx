@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
   useTheme,
   type ThemeConfig,
@@ -6,295 +6,427 @@ import {
 } from "react-theming-engine";
 import "./App.css";
 
+// ─── SVG Icons (Professional Brand Assets) ───────────────────────────────────
+
+const IconNPM = () => (
+  <svg viewBox="0 0 780 250" width="54" height="18" style={{ display: "block" }}>
+    <path fill="#000000" d="M240 250h100v-200h100v200h40V0H0v250h240zM480 250h40V50h100v150h20V50h20V0H480v250zM620 0v250h40V50h100v200h40V0H620z" />
+  </svg>
+);
+
+const IconGitHub = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+    <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
+  </svg>
+);
+
+const IconLinkedIn = () => (
+  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.454C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+  </svg>
+);
+
+const IconArrowUpRight = () => (
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="square">
+    <line x1="7" y1="17" x2="17" y2="7" /><polyline points="7 7 17 7 17 17" />
+  </svg>
+);
+
 // ─── Component Demos ─────────────────────────────────────────────────────────
 
-function NotificationDemo() {
+function CodeSnippet({ title, code }: { title: string; code: string }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   return (
-    <div className="card notification-card">
-      <div className="notification-header">
-        <div className="notification-icon">🔔</div>
-        <div className="notification-body">
-          <div className="notification-title">System Update</div>
-          <div className="notification-msg">A new version is available for your project.</div>
-        </div>
+    <div className="code-container" style={{ border: "2px solid var(--color-border)" }}>
+      <div className="code-header" style={{ borderBottom: "2px solid var(--color-border)" }}>
+        <span className="code-title">{title}</span>
+        <button className="code-copy-btn" onClick={handleCopy}>{copied ? "✓ Copied" : "Copy Source"}</button>
       </div>
-      <div className="notification-actions">
-        <button className="btn btn-primary btn-sm">Update Now</button>
-        <button className="btn btn-outline btn-sm">Later</button>
-      </div>
-    </div>
-  );
-}
-
-function StatsCard() {
-  return (
-    <div className="card stats-card">
-      <div className="card-header">
-        <span className="card-title">Weekly Revenue</span>
-      </div>
-      <div className="stats-value">$12.4k</div>
-      <div className="stats-trend positive">↑ 14.5% vs last week</div>
-      <div className="mini-chart">
-        {[40, 60, 45, 90, 70, 85, 95].map((val, i) => (
-          <div
-            key={i}
-            className="mini-bar"
-            style={{ height: `${val}%` }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function NavigationMenu() {
-  return (
-    <div className="card nav-menu">
-      <div className="nav-item active">🏠 Dashboard</div>
-      <div className="nav-item">📈 Analytics</div>
-      <div className="nav-item">👤 Profile</div>
-      <div className="nav-item">⚙️ Settings</div>
-      <div className="nav-divider" />
-      <div className="nav-item danger">🚪 Logout</div>
-    </div>
-  );
-}
-
-function PricingCard() {
-  return (
-    <div className="card pricing-card">
-      <div className="pricing-tag">Most Popular</div>
-      <div className="card-header">
-        <span className="card-title">Pro Plan</span>
-      </div>
-      <div className="pricing-price">
-        $29<span className="pricing-period">/mo</span>
-      </div>
-      <ul className="pricing-features">
-        <li>✓ Unlimited Projects</li>
-        <li>✓ Custom Domains</li>
-        <li>✓ Advanced Analytics</li>
-      </ul>
-      <button className="btn btn-primary" style={{ width: "100%", marginTop: "1rem" }}>
-        Get Started
-      </button>
-    </div>
-  );
-}
-
-function ProfileCard() {
-  return (
-    <div className="card profile-card">
-      <div className="profile-header">
-        <div className="profile-avatar">AD</div>
-        <div>
-          <div className="profile-name">Alex Designer</div>
-          <div className="profile-role">UI/UX Engineer</div>
-        </div>
-      </div>
-      <div className="profile-stats">
-        <div className="p-stat"><strong>12</strong><span>Projects</span></div>
-        <div className="p-stat"><strong>2.4k</strong><span>Followers</span></div>
-      </div>
-      <button className="btn btn-outline btn-sm" style={{ width: "100%", marginTop: "1rem" }}>
-        View Portfolio
-      </button>
-    </div>
-  );
-}
-
-function StepsDemo() {
-  return (
-    <div className="card">
-      <div className="card-header">
-        <span className="card-title">Setup Progress</span>
-      </div>
-      <div className="steps">
-        <div className="step active">
-          <div className="step-circle">1</div>
-          <div className="step-line" />
-        </div>
-        <div className="step active">
-          <div className="step-circle">2</div>
-          <div className="step-line" />
-        </div>
-        <div className="step">
-          <div className="step-circle">3</div>
-        </div>
-      </div>
-      <div className="typo-subtle" style={{ marginTop: "1rem", textAlign: "center" }}>
-        Step 2 of 3: Configure Theme
-      </div>
-    </div>
-  );
-}
-
-function StatusBanners() {
-  return (
-    <div className="card">
-      <div className="card-header">
-        <span className="card-icon">🚦</span>
-        <span className="card-title">Status Banners</span>
-      </div>
-      <div className="banner banner-success">✅ Completed successfully</div>
-      <div className="banner banner-warning">⚠️ Needs attention</div>
-      <div className="banner banner-error">❌ Connection failed</div>
-      <div className="banner banner-info">ℹ️ Update available</div>
+      <pre className="code-block" style={{ fontSize: "0.85rem" }}>{code}</pre>
     </div>
   );
 }
 
 function InputDemo() {
   return (
-    <div className="card">
-      <div className="card-header">
-        <span className="card-icon">📝</span>
-        <span className="card-title">Inputs & Focus</span>
+    <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <span className="card-title" style={{ fontSize: "1.2rem" }}>System Config</span>
+        <div style={{ padding: "4px 8px", background: "color-mix(in srgb, var(--color-accent) 15%, transparent)", borderRadius: "4px", fontSize: "0.7rem", fontWeight: 900, color: "var(--color-accent)" }}>NODE ACTIVE</div>
       </div>
-      <div className="input-group">
-        <input className="input" placeholder="Name..." />
-        <input className="input" placeholder="Email..." />
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button className="btn btn-primary" style={{ flex: 1 }}>
-            Submit
-          </button>
-          <button className="btn btn-outline" style={{ flex: 1 }}>
-            Cancel
-          </button>
-        </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+        <label style={{ fontSize: "0.75rem", fontWeight: 900, textTransform: "uppercase", color: "var(--color-foreground-muted)", letterSpacing: "0.08em" }}>Node Identifier</label>
+        <input
+          type="text"
+          defaultValue="production-cluster-01"
+          className="input-refined"
+        />
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+        <button className="btn btn-primary" style={{ padding: "0.6rem" }}>Update Cluster</button>
+        <button className="btn btn-outline" style={{ padding: "0.6rem" }}>Reset Node</button>
       </div>
     </div>
+  );
+}
+
+function IntegrationGuide() {
+  return (
+    <section className="section">
+      <div className="section-header">
+        <h2 className="section-title">Developer Integration</h2>
+        <p className="section-subtitle">Official usage patterns for modern design infrastructures</p>
+      </div>
+      <div className="grid grid-2">
+        <div className="integration-box">
+          <div className="integration-header">
+            <span className="integration-type">Tailwind CSS</span>
+          </div>
+          <CodeSnippet
+            title="tailwind.config.js"
+            code={`module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        primary: {
+          500: 'var(--color-primary-500)',
+          600: 'var(--color-primary-600)',
+        },
+        accent: 'var(--color-accent)',
+        surface: 'var(--color-surface)',
+      }
+    }
+  }
+}`} />
+        </div>
+        <div className="integration-box">
+          <div className="integration-header">
+            <span className="integration-type">Semantic CSS</span>
+          </div>
+          <CodeSnippet
+            title="globals.css"
+            code={`.btn-primary {
+  background-color: var(--color-accent);
+  color: var(--color-accent-foreground);
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  border: 2px solid transparent;
+  font-weight: 700;
+}`} />
+        </div>
+      </div>
+    </section>
   );
 }
 
 function TypographyDemo() {
   return (
     <div className="card">
-      <div className="card-header">
-        <span className="card-icon">🔤</span>
-        <span className="card-title">Typography</span>
-      </div>
-      <div className="typo-h1">Heading One</div>
-      <div className="typo-h2">Heading Two</div>
-      <div className="typo-body">Body text using foreground-muted.</div>
-      <div className="typo-subtle">Subtle supporting text.</div>
-      <div className="typo-accent" style={{ marginTop: "0.4rem" }}>
-        Accent-colored interactive →
+      <div className="typo-showcase">
+        <div className="typo-group">
+          <span className="typo-tag" style={{ letterSpacing: "0.3em" }}>Brand Display</span>
+          <h1 className="typo-display" style={{ fontWeight: 900, letterSpacing: "-0.05em" }}>Universal Type</h1>
+        </div>
+        <div className="typo-group">
+          <span className="typo-tag" style={{ letterSpacing: "0.3em" }}>System Lead</span>
+          <p className="typo-lead" style={{ letterSpacing: "0.04em" }}>Optimized scalability for modern design systems.</p>
+        </div>
       </div>
     </div>
   );
 }
 
-function ShapeDemo({ theme }: { theme: ThemeConfig }) {
+function ProjectStatsDemo() {
+  const stats = [
+    { label: "Total Projects", value: "24", trend: "6+ Increased", featured: true },
+    { label: "Ended Projects", value: "10", trend: "6+ Increased", featured: false },
+    { label: "Running Projects", value: "12", trend: "2+ Increased", featured: false },
+    { label: "Pending Project", value: "02", trend: "On Discuss", featured: false },
+  ];
+
   return (
-    <div className="card">
-      <div className="card-header">
-        <span className="card-icon">🔲</span>
-        <span className="card-title">Border Radius</span>
-      </div>
-      <div className="radius-row">
-        {Object.entries(theme.shape).map(([key, value]) => {
-          const label = key.replace("radius", "").toLowerCase() || key;
-          return (
-            <div className="radius-item" key={key}>
-              <div className="radius-box" style={{ borderRadius: value }} />
-              <span className="radius-name">{label}</span>
-              <span className="radius-name">{value}</span>
+    <div className="project-grid">
+      {stats.map((s, i) => (
+        <div key={i} className={`project-card ${s.featured ? "featured" : ""}`} style={{ border: s.featured ? "none" : "2px solid var(--color-border)" }}>
+          <div className="project-card-header">
+            <span className="project-label">{s.label}</span>
+            <div className="project-icon-btn"><IconArrowUpRight /></div>
+          </div>
+          <div className="project-value">{s.value}</div>
+          <div className="project-footer">
+            <span className="trend-indicator">{s.trend}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ─── Main App ───────────────────────────────────────────────────────────────
+
+export default function App() {
+  const { theme, setTheme, toggleColorMode, overrideTheme, resetTheme } = useTheme();
+  const [activePrimaryScale, setActivePrimaryScale] = useState<ColorScale | null>(null);
+
+  const applyPrimaryOverride = useCallback((scale: ColorScale) => {
+    overrideTheme({
+      palette: { primary: scale },
+      tokens: {
+        accent: scale[600],
+        accentHover: scale[700],
+        accentForeground: "#ffffff",
+        ring: scale[600],
+      },
+    });
+  }, [overrideTheme]);
+
+  const handlePrimaryPreset = useCallback((scale: ColorScale) => {
+    setActivePrimaryScale(scale);
+    applyPrimaryOverride(scale);
+  }, [applyPrimaryOverride]);
+
+  const handleCustomPrimaryHex = useCallback((hex: string) => {
+    const scale = generateScaleFromHex(hex);
+    handlePrimaryPreset(scale);
+  }, [handlePrimaryPreset]);
+
+  useEffect(() => {
+    if (activePrimaryScale) applyPrimaryOverride(activePrimaryScale);
+  }, [theme.colorMode, activePrimaryScale, applyPrimaryOverride]);
+
+  const [copied, setCopied] = useState(false);
+  const copyInstall = () => {
+    navigator.clipboard.writeText("npm i react-theming-engine");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const THEMES = [
+    { name: "light", icon: "⚪", label: "Light" },
+    { name: "dark", icon: "⚫", label: "Dark" },
+    { name: "ocean", icon: "🔵", label: "Ocean" },
+    { name: "sunset", icon: "🟧", label: "Sunset" },
+    { name: "forest", icon: "🟢", label: "Forest" },
+    { name: "violet", icon: "🟣", label: "Violet" },
+    { name: "earth", icon: "🟤", label: "Earth" },
+  ];
+
+  return (
+    <div className="app" data-theme={theme.name}>
+      <header className="hero">
+        <div className="hero-inner">
+          <div className="hero-stack">
+            <div className="hero-brand">
+              <h1 className="hero-title" style={{ fontWeight: 900 }}>react-theming-engine</h1>
             </div>
+            <div style={{ marginBottom: "2.5rem" }}>
+              <a href="https://www.linkedin.com/in/abilash-s-84608a23a/" target="_blank" rel="noreferrer" className="badge-dev">
+                👨‍💻 PRODUCED BY ABILASH →
+              </a>
+            </div>
+            <p className="hero-desc">The high-performance branding architecture for professional React design systems. Built for persistence, speed, and absolute scale.</p>
+            <div className="hero-cta-group" style={{ display: "flex", gap: "24px", flexWrap: "wrap", alignItems: "center" }}>
+              <a href="https://www.npmjs.com/package/react-theming-engine" target="_blank" rel="noreferrer" className="text-link-ui" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none", fontWeight: 900, color: "var(--color-foreground)" }}>
+                <IconNPM /> NPM docs
+              </a>
+              <a href="https://github.com/Abilash-19/react-theming-engine" target="_blank" rel="noreferrer" className="btn btn-outline" style={{ display: "flex", alignItems: "center", gap: "12px", textDecoration: "none" }}>
+                <IconGitHub /> SOURCE CODE
+              </a>
+              <button className={`btn btn-outline ${copied ? "copied" : ""}`} onClick={copyInstall} style={{ fontFamily: "var(--font-mono)", fontSize: "0.85rem" }}>
+                {copied ? "✓ COPIED" : "npm i react-theming-engine"}
+              </button>
+            </div>
+          </div>
+          <div className="hero-picker-container" style={{ border: "2px solid var(--color-border)" }}>
+            <div className="picker-header">
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span className="picker-label">Design Authority</span>
+                <span style={{ fontSize: "0.7rem", color: "var(--color-foreground-subtle)", marginTop: "2px" }}>Custom focus logic across system modes.</span>
+              </div>
+              <button className="reset-link" onClick={() => { setActivePrimaryScale(null); resetTheme(); }}>Reset System</button>
+            </div>
+            <PrimaryColorChanger theme={theme} onSelectPreset={handlePrimaryPreset} onCustomColor={handleCustomPrimaryHex} />
+          </div>
+        </div>
+      </header>
+
+      <nav className="theme-bar" style={{ borderBottom: "2px solid var(--color-border)" }}>
+        <div className="theme-bar-inner">
+          <div className="theme-selector">
+            {THEMES.map(t => (
+              <button key={t.name} className={`theme-btn ${theme.name === t.name ? "active" : ""}`} onClick={() => { setActivePrimaryScale(null); setTheme(t.name); }}>
+                <span style={{ marginRight: "10px" }}>{theme.name === t.name ? "✨" : t.icon}</span> {t.label}
+              </button>
+            ))}
+          </div>
+          <button className="btn btn-outline btn-sm" onClick={toggleColorMode}>
+            {theme.colorMode === "dark" ? "LIGHT SYSTEM" : "DARK SYSTEM"}
+          </button>
+        </div>
+      </nav>
+
+      <main className="content">
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">Component Playground</h2>
+            <p className="section-subtitle">Explore how the engine adapts to your custom design tokens in real-time.</p>
+          </div>
+          <ProjectStatsDemo />
+          <div className="grid grid-3" style={{ marginTop: "2rem" }}>
+            <div className="card" style={{ padding: "1.25rem", border: "2px solid var(--color-border)" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                {["Dashboard Instance", "Analytics Engine", "Logical Hooks", "Proprietary Tokens"].map((item, i) => (
+                  <div key={i} className={`nav-item-refined ${i === 0 ? "active" : ""}`} style={{ padding: "1rem 1.5rem", borderRadius: "1px", fontWeight: 700 }}>{item}</div>
+                ))}
+              </div>
+            </div>
+            <InputDemo />
+            <div className="card" style={{ border: "2px solid var(--color-border)", display: "flex", flexDirection: "column", justifyContent: "center", textAlign: "center", padding: "2.5rem" }}>
+              <div style={{ fontSize: "3rem", marginBottom: "1.5rem" }}>🚀</div>
+              <div className="card-title">Production Logic</div>
+              <p className="typo-muted" style={{ fontSize: "0.9rem" }}>Designed for absolute scalability in React core ecosystems.</p>
+            </div>
+          </div>
+        </section>
+
+        <IntegrationGuide />
+
+        <section className="section">
+          <h2 className="section-title" style={{ marginBottom: "2.5rem" }}>Visual Guidelines</h2>
+          <div className="grid grid-2">
+            <TypographyDemo />
+            <div className="card" style={{ border: "2px solid var(--color-border)" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
+                <span className="card-title" style={{ fontWeight: 900 }}>Coverage Report</span>
+                <span className="trend-indicator" style={{ fontWeight: 900 }}>98.2% SYNC</span>
+              </div>
+              <div style={{ display: "flex", gap: "12px", height: "140px", alignItems: "flex-end" }}>
+                {[20, 50, 40, 85, 60, 75, 100].map((v, i) => (
+                  <div key={i} style={{ flex: 1, background: "var(--color-accent)", opacity: 0.15 + (i * 0.14), height: `${v}%` }} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="section">
+          <h2 className="section-title" style={{ marginBottom: "2.5rem" }}>Export Configuration</h2>
+          <CodeSnippet title="release-v1.4.0.json" code={JSON.stringify({
+            version: "1.4.0",
+            engine: "react-theming",
+            tokens: theme.tokens,
+            primary: theme.palette.primary
+          }, null, 2)} />
+        </section>
+      </main>
+
+      <footer className="footer-refined">
+        <div className="footer-top">
+          <div className="footer-col brand">
+            <div className="footer-brand-title">react-theming-engine</div>
+            <p className="footer-tagline">Precision-engineered design system architecture for professional React deployments.</p>
+            <div className="footer-socials">
+              <a href="https://github.com/Abilash-19/react-theming-engine" target="_blank" rel="noreferrer"><IconGitHub /></a>
+              <a href="https://www.linkedin.com/in/abilash-s-84608a23a/" target="_blank" rel="noreferrer"><IconLinkedIn /></a>
+              <a href="https://www.npmjs.com/package/react-theming-engine" target="_blank" rel="noreferrer"><IconNPM /></a>
+            </div>
+          </div>
+          <div className="footer-col">
+            <div className="footer-label">Ecosystem</div>
+            <a href="https://github.com/Abilash-19/react-theming-engine" target="_blank" rel="noreferrer" className="footer-link">Engine Core</a>
+            <a href="https://www.npmjs.com/package/react-theming-engine" target="_blank" rel="noreferrer" className="footer-link">NPM Registry</a>
+            <a href="https://github.com/Abilash-19/react-theme-engine-demo" target="_blank" rel="noreferrer" className="footer-link">Documentation</a>
+          </div>
+          <div className="footer-col">
+            <div className="footer-label">Developer</div>
+            <a href="https://www.linkedin.com/in/abilash-s-84608a23a/" target="_blank" rel="noreferrer" className="footer-link">LinkedIn Profile</a>
+            <a href="https://github.com/Abilash-19" target="_blank" rel="noreferrer" className="footer-link">GitHub Portfolio</a>
+            <div style={{ marginTop: "1rem" }}>
+              <button className="btn btn-primary btn-sm" onClick={() => window.open("https://www.linkedin.com/in/abilash-s-84608a23a/", "_blank")}>CONNECT NOW</button>
+            </div>
+          </div>
+        </div>
+        <div className="footer-bottom">
+          <div className="footer-copyright">© 2026 ABILASH. Built for the open source community.</div>
+          <div className="footer-legal">Enterprise Grade • Performance Tested • Production Ready</div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+function PrimaryColorChanger({ theme, onSelectPreset, onCustomColor }: { theme: ThemeConfig; onSelectPreset: (s: ColorScale) => void; onCustomColor: (h: string) => void }) {
+  const [customHex, setCustomHex] = useState(theme.palette.primary[500]);
+  useEffect(() => {
+    const current = theme.palette.primary[500];
+    if (current && current !== customHex) setCustomHex(current);
+  }, [theme.palette.primary]);
+
+  return (
+    <div className="primary-changer">
+      <div className="preset-grid-modern">
+        {PRIMARY_PRESETS.map(p => {
+          const isActive = theme.palette.primary[500].toLowerCase() === p.scale[500].toLowerCase();
+          return (
+            <button
+              key={p.label}
+              className={`preset-modern-btn ${isActive ? "active" : ""}`}
+              onClick={() => onSelectPreset(p.scale)}
+              style={{ "--preset-color": p.scale[500] } as React.CSSProperties}
+            >
+              <div className="preset-shimmer" />
+            </button>
           );
         })}
       </div>
+      <div className="custom-picker-area">
+        <div className="picker-row-refined">
+          <div className="picker-visual">
+            <input type="color" className="custom-picker-input" value={customHex} onChange={e => { setCustomHex(e.target.value); onCustomColor(e.target.value); }} />
+            <div className="picker-preview" style={{ background: customHex, boxShadow: `0 0 20px color-mix(in srgb, ${customHex} 40%, transparent)` }} />
+          </div>
+          <div className="picker-details">
+            <div className="picker-hex-label">HEX VALUE</div>
+            <div className="picker-hex-val">{customHex.toUpperCase()}</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// ─── Theme Data ─────────────────────────────────────────────────────────────
-
-const THEMES: { name: string; label: string; icon: string; dot: string }[] = [
-  { name: "light", label: "Light", icon: "☀️", dot: "#ec4899" },
-  { name: "dark", label: "Dark", icon: "🌙", dot: "#6366f1" },
-  { name: "ocean", label: "Ocean", icon: "🌊", dot: "#38bdf8" },
-  { name: "sunset", label: "Sunset", icon: "🌅", dot: "#f97316" },
-  { name: "forest", label: "Forest", icon: "🌲", dot: "#34d399" },
-  { name: "violet", label: "Violet", icon: "🔮", dot: "#c084fc" },
-  { name: "earth", label: "Earth", icon: "☕", dot: "#a67c52" },
-  { name: "glass", label: "Glassy", icon: "💎", dot: "#ffffff" },
-];
-
-const PRIMARY_PRESETS: { label: string; scale: ColorScale }[] = [
-  {
-    label: "Pink",
-    scale: {
-      50: "#fdf2f8", 100: "#fce7f3", 200: "#fbcfe8", 300: "#f9a8d4",
-      400: "#f472b6", 500: "#ec4899", 600: "#db2777", 700: "#be185d",
-      800: "#9d174d", 900: "#831843",
-    },
-  },
-  {
-    label: "Indigo",
-    scale: {
-      50: "#eef2ff", 100: "#e0e7ff", 200: "#c7d2fe", 300: "#a5b4fc",
-      400: "#818cf8", 500: "#6366f1", 600: "#4f46e5", 700: "#4338ca",
-      800: "#3730a3", 900: "#312e81",
-    },
-  },
-  {
-    label: "Brown",
-    scale: {
-       50: "#fdf8f6", 100: "#f2e8e5", 200: "#eaddd7", 300: "#e0c1b3",
-       400: "#d3a28a", 500: "#c78361", 600: "#a67c52", 700: "#8b5e3c",
-       800: "#704d32", 900: "#5c3f2b",
-    },
-  },
-  {
-    label: "Emerald",
-    scale: {
-      50: "#ecfdf5", 100: "#d1fae5", 200: "#a7f3d0", 300: "#6ee7b7",
-      400: "#34d399", 500: "#10b981", 600: "#059669", 700: "#047857",
-      800: "#065f46", 900: "#064e3b",
-    },
-  },
-  {
-    label: "Orange",
-    scale: {
-      50: "#fff7ed", 100: "#ffedd5", 200: "#fed7aa", 300: "#fdba74",
-      400: "#fb923c", 500: "#f97316", 600: "#ea580c", 700: "#c2410c",
-      800: "#9a3412", 900: "#7c2d12",
-    },
-  },
-  {
-    label: "Teal",
-    scale: {
-      50: "#f0fdfa", 100: "#ccfbf1", 200: "#99f6e4", 300: "#5eead4",
-      400: "#2dd4bf", 500: "#14b8a6", 600: "#0d9488", 700: "#0f766e",
-      800: "#115e59", 900: "#134e4a",
-    },
-  },
-];
-
-const SCALE_STEPS = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900] as const;
-
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ────────────────────────────────────────────────────────────────
 
 function hexToHsl(hex: string): [number, number, number] {
-  const r = parseInt(hex.slice(1, 3), 16) / 255;
-  const g = parseInt(hex.slice(3, 5), 16) / 255;
-  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  hex = hex.replace(/^#/, "");
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
   const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h = 0, s;
   const l = (max + min) / 2;
-  if (max === min) return [0, 0, l * 100];
-  const d = max - min;
-  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-  let h = 0;
-  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-  else if (max === g) h = ((b - r) / d + 2) / 6;
-  else h = ((r - g) / d + 4) / 6;
-  return [h * 360, s * 100, l * 100];
+  if (max === min) h = s = 0;
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      case b: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [Math.round(h * 360), Math.round(s * 100), Math.round(l * 100)];
 }
 
 function hslToHex(h: number, s: number, l: number): string {
-  s /= 100; l /= 100;
-  const a = s * Math.min(l, 1 - l);
+  l /= 100;
+  const a = (s * Math.min(l, 1 - l)) / 100;
   const f = (n: number) => {
     const k = (n + h / 30) % 12;
     const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
@@ -314,244 +446,11 @@ function generateScaleFromHex(hex: string): ColorScale {
   return scale as unknown as ColorScale;
 }
 
-// ─── Main App ───────────────────────────────────────────────────────────────
-
-export default function App() {
-  const { theme, setTheme, toggleColorMode, overrideTheme, resetTheme } = useTheme();
-
-  const handlePrimaryPreset = useCallback(
-    (scale: ColorScale) => {
-      overrideTheme({
-        palette: { primary: scale },
-        tokens: {
-          accent: scale[600],
-          accentHover: scale[500],
-          accentForeground: "#ffffff",
-          ring: scale[600],
-        },
-      });
-    },
-    [overrideTheme],
-  );
-
-  const handleCustomPrimaryHex = useCallback(
-    (hex: string) => {
-      const scale = generateScaleFromHex(hex);
-      handlePrimaryPreset(scale);
-    },
-    [handlePrimaryPreset],
-  );
-
-  const handleReset = useCallback(() => {
-    resetTheme();
-  }, [resetTheme]);
-
-  const handleRandomize = useCallback(() => {
-    const randomHex = `#${Math.floor(Math.random() * 16777215).toString(16).padStart(6, "0")}`;
-    handleCustomPrimaryHex(randomHex);
-    const otherThemes = THEMES.filter((t) => t.name !== theme.name);
-    const randomTheme = otherThemes[Math.floor(Math.random() * otherThemes.length)];
-    setTheme(randomTheme.name);
-  }, [handleCustomPrimaryHex, setTheme, theme.name]);
-
-  return (
-    <div className="app">
-      {/* Hero */}
-      <div className="hero minimal interaction-hero">
-        <div className="hero-inner split-layout">
-          <div className="hero-left">
-            <div className="hero-brand">
-              <div className="hero-logo">🎨</div>
-              <div>
-                <h1 className="hero-title">React Theming Engine</h1>
-                <span className="hero-version">v0.1.0 • {theme.colorMode} mode</span>
-              </div>
-            </div>
-            <p className="hero-desc">
-              The ultimate theming engine for React. One primary color is all it takes to transform your entire design system instantly.
-            </p>
-            <div className="hero-badges">
-              <span className="badge">3-Layer Arch</span>
-              <span className="badge">Zero Runtime</span>
-              <span className="badge">Type Safe</span>
-            </div>
-          </div>
-
-          <div className="hero-right">
-            <div className="hero-picker-container">
-              <div className="picker-label">Configure Primary Color</div>
-              <PrimaryColorChanger
-                theme={theme}
-                onSelectPreset={handlePrimaryPreset}
-                onCustomColor={handleCustomPrimaryHex}
-                onReset={handleReset}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Theme Bar */}
-      <div className="theme-bar">
-        <div className="theme-bar-inner">
-          <div className="theme-selector">
-            {THEMES.map((t) => (
-              <button
-                key={t.name}
-                className={`theme-btn ${theme.name === t.name ? "active" : ""}`}
-                onClick={() => setTheme(t.name)}
-              >
-                <span className="theme-btn-dot" style={{ backgroundColor: t.dot }} />
-                {t.icon} {t.label}
-              </button>
-            ))}
-          </div>
-          <div className="theme-actions">
-            <button className="btn btn-primary btn-sm" onClick={toggleColorMode}>
-              ⇄ Toggle Mode
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="content">
-        <div className="section instructions-section">
-          <SectionHeader icon="📖" title="How it Works" />
-          <div className="grid grid-3">
-            <div className="instruction-card">
-              <div className="ins-num">1</div>
-              <h3>Pick Primary</h3>
-              <p>Select a preset or choose a custom color. We generate a full 10-step scale automatically.</p>
-            </div>
-            <div className="instruction-card">
-              <div className="ins-num">2</div>
-              <h3>Tokens Map</h3>
-              <p>Semantic tokens like <code>accent</code> and <code>ring</code> map directly to specific scale steps.</p>
-            </div>
-            <div className="instruction-card">
-              <div className="ins-num">3</div>
-              <h3>Live Refresh</h3>
-              <p>CSS variables update in real-time. No re-renders, no flash of unstyled content.</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="section landing-showcase">
-          <SectionHeader icon="🚀" title="Premium Showcase" />
-          <div className="grid grid-3">
-            <PricingCard />
-            <ProfileCard />
-            <NotificationDemo />
-          </div>
-        </div>
-
-        <div className="section landing-showcase">
-          <SectionHeader icon="✨" title="Live Widgets" />
-          <div className="grid grid-3">
-            <StatsCard />
-            <StepsDemo />
-            <NavigationMenu />
-          </div>
-        </div>
-
-        <div className="section">
-          <SectionHeader icon="🧩" title="Base Elements" />
-          <div className="grid grid-3">
-            <StatusBanners />
-            <InputDemo />
-            <TypographyDemo />
-          </div>
-        </div>
-
-        <div className="section">
-          <SectionHeader icon="⚙️" title="Border Radius" />
-          <ShapeDemo theme={theme} />
-        </div>
-
-        <div className="section">
-          <SectionHeader icon="📋" title="Theme Config (JSON)" />
-          <pre className="code-block">
-            {JSON.stringify({
-              name: theme.name,
-              colorMode: theme.colorMode,
-              tokens: theme.tokens,
-              shape: theme.shape,
-            }, null, 2)}
-          </pre>
-        </div>
-      </div>
-
-      {/* Floating Controls */}
-      <div className="floating-controls">
-        <button className="fab fab-primary" onClick={handleRandomize} title="Surprise Me!">✨</button>
-        <div className="pill-switcher">
-          {THEMES.map((t) => (
-            <button
-              key={t.name}
-              className={`pill-btn ${theme.name === t.name ? "active" : ""}`}
-              onClick={() => setTheme(t.name)}
-              title={t.label}
-            >{t.icon}</button>
-          ))}
-          <div className="pill-divider" />
-          <button className="pill-btn" onClick={toggleColorMode} title="Toggle Mode">🌓</button>
-        </div>
-      </div>
-
-      <footer className="footer">
-        <strong>react-theming-engine</strong> — Brand Palette → Semantic Tokens → CSS Variables
-      </footer>
-    </div>
-  );
-}
-
-// ─── Sub-Components ──────────────────────────────────────────────────────────
-
-function PrimaryColorChanger({ theme, onSelectPreset, onCustomColor, onReset }: any) {
-  const [customHex, setCustomHex] = useState(theme.palette.primary[500]);
-  return (
-    <div className="primary-changer">
-      <div className="primary-changer-presets">
-        <div className="primary-changer-label">Quick Presets</div>
-        <div className="preset-grid">
-          {PRIMARY_PRESETS.map((preset) => (
-            <button key={preset.label} className="preset-btn" onClick={() => onSelectPreset(preset.scale)}>
-              <div className="preset-swatch-row">
-                {([300, 400, 500, 600, 700] as const).map((step) => (
-                  <div key={step} className="preset-mini-swatch" style={{ backgroundColor: preset.scale[step] }} />
-                ))}
-              </div>
-              <span className="preset-name">{preset.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-      <div className="primary-changer-custom">
-        <div className="primary-changer-label">Custom Color</div>
-        <div className="custom-picker-row">
-          <input type="color" className="custom-picker-input" value={customHex} onChange={(e) => {
-            setCustomHex(e.target.value);
-            onCustomColor(e.target.value);
-          }} />
-          <span className="custom-picker-hex">{customHex}</span>
-          <div className="custom-picker-preview">
-            {SCALE_STEPS.map((step) => (
-              <div key={step} className="custom-preview-swatch" style={{ backgroundColor: theme.palette.primary[step] }} />
-            ))}
-          </div>
-          <button className="btn btn-outline btn-sm" onClick={onReset}>↺ Reset</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SectionHeader({ icon, title }: any) {
-  return (
-    <div className="section-header">
-      <div className="section-icon">{icon}</div>
-      <h2 className="section-title">{title}</h2>
-    </div>
-  );
-}
+const PRIMARY_PRESETS = [
+  { label: "Crimson", scale: generateScaleFromHex("#e11d48") },
+  { label: "Stellar", scale: generateScaleFromHex("#3b82f6") },
+  { label: "Jade", scale: generateScaleFromHex("#10b981") },
+  { label: "Amber", scale: generateScaleFromHex("#f59e0b") },
+  { label: "Cyan", scale: generateScaleFromHex("#06b6d4") },
+  { label: "Violet", scale: generateScaleFromHex("#8b5cf6") },
+];

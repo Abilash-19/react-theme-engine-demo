@@ -1,103 +1,153 @@
-# 🎨 React Theming Engine
+# 🎨 react-theming-engine
 
-> **The ultimate theming engine for React.** One primary color is all it takes to transform your entire design system instantly.
+**A production-ready infrastructure for dynamic theming in React.** Transform your entire UI using a single brand color, mapped to semantic tokens and injected via CSS variables.
 
 [![npm version](https://img.shields.io/npm/v/react-theming-engine.svg)](https://www.npmjs.com/package/react-theming-engine)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-
-React Theming Engine is a powerful, type-safe styling system built on a **3-Layer Architecture**:
-1. **Brand Palette**: A full 10-step color scale generated from a single hex code.
-2. **Semantic Tokens**: Abstract tokens (e.g., `accent`, `ring`, `background`) mapped to palette steps.
-3. **CSS Variables**: Real-time injection into the DOM for zero-runtime performance feel.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🚀 Installation
+## 🚀 Features
+
+- **3-Layer Architecture**: Brand Palette → Semantic Tokens → CSS Variables.
+- **Auto-Generated Scales**: Full 10-step scales (50-900) from any hex color.
+- **Zero Runtime Style Invalidation**: No CSS-in-JS performance hits. Standard CSS variables are used.
+- **Type Safe**: Full TypeScript support for tokens and configurations.
+- **Persistence**: Built-in support for `localStorage`.
+
+---
+
+## 🛠️ Installation
 
 ```bash
 npm install react-theming-engine
 # or
 yarn add react-theming-engine
-# or
-pnpm add react-theming-engine
 ```
 
 ---
 
-## 🛠️ Quick Start
+## 📖 Quick Start
 
 ### 1. Wrap your application
 
-Wrap your root component with the `ThemeProvider`. This manages the theme state, persistence, and CSS variable injection.
-
 ```tsx
-// main.tsx
 import { ThemeProvider } from "react-theming-engine";
 
-createRoot(document.getElementById("root")).render(
-  <ThemeProvider defaultThemeName="light" storageKey="my-app-theme">
-    <App />
-  </ThemeProvider>
-);
+function Root() {
+  return (
+    <ThemeProvider defaultThemeName="light" storageKey="app-theme">
+      <App />
+    </ThemeProvider>
+  );
+}
 ```
 
-### 2. Access the theme state
-
-Use the `useTheme` hook anywhere in your app to control the interface.
+### 2. Use the hook
 
 ```tsx
 import { useTheme } from "react-theming-engine";
 
-function ThemeSwitcher() {
+function MyComponent() {
   const { theme, setTheme, toggleColorMode } = useTheme();
 
   return (
-    <div>
-      <p>Current Mode: {theme.colorMode}</p>
-      <button onClick={() => setTheme('dark')}>Dark Mode</button>
-      <button onClick={toggleColorMode}>Toggle Light/Dark</button>
-    </div>
+    <button onClick={toggleColorMode}>
+      Theme: {theme.colorMode}
+    </button>
   );
 }
 ```
 
 ---
 
-## ✨ Features
+## 🧩 Usage Guide
 
-### 🌈 Real-time Theme Overrides
-Transform your UI on the fly by overriding specific palette scales or semantic tokens.
+### 🌊 In Normal CSS (Vanilla)
 
-```tsx
-const { overrideTheme } = useTheme();
+The engine injects semantic tokens as CSS variables. You can use them directly in any `.css` or `.scss` file.
 
-const handleUpdatePrimary = (newScale: ColorScale) => {
-  overrideTheme({
-    palette: { primary: newScale },
-    tokens: {
-      accent: newScale[600],
-      accentHover: newScale[500],
-    }
-  });
+```css
+/* button.css */
+.my-button {
+  background-color: var(--color-accent); /* Mapped from your primary scale */
+  color: var(--color-accent-foreground);
+  border-radius: var(--radius-md);
+  box-shadow: 0 4px 6px var(--color-shadow);
+}
+
+.my-button:hover {
+  background-color: var(--color-accent-hover);
+}
+```
+
+### 💨 In Tailwind CSS
+
+To make Tailwind aware of the dynamic variables, add them to your `tailwind.config.js`.
+
+```js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: ["./src/**/*.{js,ts,jsx,tsx}"],
+  theme: {
+    extend: {
+      colors: {
+        background: "var(--color-background)",
+        foreground: "var(--color-foreground)",
+        accent: {
+          DEFAULT: "var(--color-accent)",
+          foreground: "var(--color-accent-foreground)",
+          hover: "var(--color-accent-hover)",
+        },
+        surface: {
+          DEFAULT: "var(--color-surface)",
+          hover: "var(--color-surface-hover)",
+        },
+        border: {
+          DEFAULT: "var(--color-border)",
+          subtle: "var(--color-border-subtle)",
+          strong: "var(--color-border-strong)",
+        }
+      },
+      borderRadius: {
+        sm: "var(--radius-sm)",
+        md: "var(--radius-md)",
+        lg: "var(--radius-lg)",
+        xl: "var(--radius-xl)",
+      }
+    },
+  },
+  plugins: [],
 };
 ```
 
-### 🧩 Type Safety
-Enjoy full TypeScript support for your theme configuration, palette steps, and token definitions.
-
-### 🌓 Built-in Mode Management
-Seamlessly switch between Light and Dark modes with automatic persistence to `localStorage`.
-
-### 🚀 Zero Runtime Feel
-Transitions are handled via CSS variables (`--ring`, `--accent`, etc.), ensuring smooth updates without expensive React re-renders for styles.
+**Usage in components:**
+```tsx
+<div className="bg-background text-foreground border-border rounded-md p-4">
+  <button className="bg-accent hover:bg-accent-hover text-accent-foreground px-4 py-2 rounded-lg">
+    Dynamic Button
+  </button>
+</div>
+```
 
 ---
 
-## 📖 How it Works
+## 🏗️ Architecture
 
-1. **Pick Primary**: You provide a single color. We generate a full 10-step scale (50-900) automatically.
-2. **Tokens Map**: Semantic tokens like `accent` and `ring` map directly to specific scale steps.
-3. **Live Refresh**: CSS variables update in the `:root` or container in real-time. No style flash.
+1.  **Brand Palette**: We take a `primary` color and generate colors like `primary-50`, `primary-500`, etc.
+2.  **Semantic Tokens**: Tokens like `accent` point to a specific level of the palette (e.g., `primary-600` in light mode, `primary-400` in dark mode).
+3.  **CSS Variables**: These tokens are written to the document root as `--color-accent`, allowing any CSS (Tailwind, CSS Modules, etc.) to consume them.
+
+---
+
+## ⚡ API Surface
+
+### `useTheme()` returns:
+- `theme`: The full theme configuration object.
+- `setTheme(name: string)`: Switch to a named preset.
+- `toggleColorMode()`: Swap between `light` and `dark`.
+- `overrideTheme(config)`: Change tokens or scales on the fly.
+- `resetTheme()`: Revert to default configuration.
 
 ---
 

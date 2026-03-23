@@ -12,7 +12,7 @@
   "dependencies": {
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "react-theming-engine": "file:../react-theme-engine"
+    "react-theming-engine": "^0.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
