@@ -1,73 +1,106 @@
-# React + TypeScript + Vite
+# 🎨 React Theming Engine
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **The ultimate theming engine for React.** One primary color is all it takes to transform your entire design system instantly.
 
-Currently, two official plugins are available:
+[![npm version](https://img.shields.io/npm/v/react-theming-engine.svg)](https://www.npmjs.com/package/react-theming-engine)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+React Theming Engine is a powerful, type-safe styling system built on a **3-Layer Architecture**:
+1. **Brand Palette**: A full 10-step color scale generated from a single hex code.
+2. **Semantic Tokens**: Abstract tokens (e.g., `accent`, `ring`, `background`) mapped to palette steps.
+3. **CSS Variables**: Real-time injection into the DOM for zero-runtime performance feel.
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Installation
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install react-theming-engine
+# or
+yarn add react-theming-engine
+# or
+pnpm add react-theming-engine
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 🛠️ Quick Start
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Wrap your application
+
+Wrap your root component with the `ThemeProvider`. This manages the theme state, persistence, and CSS variable injection.
+
+```tsx
+// main.tsx
+import { ThemeProvider } from "react-theming-engine";
+
+createRoot(document.getElementById("root")).render(
+  <ThemeProvider defaultThemeName="light" storageKey="my-app-theme">
+    <App />
+  </ThemeProvider>
+);
 ```
+
+### 2. Access the theme state
+
+Use the `useTheme` hook anywhere in your app to control the interface.
+
+```tsx
+import { useTheme } from "react-theming-engine";
+
+function ThemeSwitcher() {
+  const { theme, setTheme, toggleColorMode } = useTheme();
+
+  return (
+    <div>
+      <p>Current Mode: {theme.colorMode}</p>
+      <button onClick={() => setTheme('dark')}>Dark Mode</button>
+      <button onClick={toggleColorMode}>Toggle Light/Dark</button>
+    </div>
+  );
+}
+```
+
+---
+
+## ✨ Features
+
+### 🌈 Real-time Theme Overrides
+Transform your UI on the fly by overriding specific palette scales or semantic tokens.
+
+```tsx
+const { overrideTheme } = useTheme();
+
+const handleUpdatePrimary = (newScale: ColorScale) => {
+  overrideTheme({
+    palette: { primary: newScale },
+    tokens: {
+      accent: newScale[600],
+      accentHover: newScale[500],
+    }
+  });
+};
+```
+
+### 🧩 Type Safety
+Enjoy full TypeScript support for your theme configuration, palette steps, and token definitions.
+
+### 🌓 Built-in Mode Management
+Seamlessly switch between Light and Dark modes with automatic persistence to `localStorage`.
+
+### 🚀 Zero Runtime Feel
+Transitions are handled via CSS variables (`--ring`, `--accent`, etc.), ensuring smooth updates without expensive React re-renders for styles.
+
+---
+
+## 📖 How it Works
+
+1. **Pick Primary**: You provide a single color. We generate a full 10-step scale (50-900) automatically.
+2. **Tokens Map**: Semantic tokens like `accent` and `ring` map directly to specific scale steps.
+3. **Live Refresh**: CSS variables update in the `:root` or container in real-time. No style flash.
+
+---
+
+## 📄 License
+
+MIT © [Abilash-19](https://github.com/Abilash-19)
